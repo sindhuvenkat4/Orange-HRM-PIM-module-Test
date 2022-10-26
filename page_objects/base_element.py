@@ -4,11 +4,12 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 class BaseElement:
 
-    def __init__(self, driver, locator):
+    def __init__(self, driver, locator, should_wait=True, timeout=10):
         self.driver = driver
         self.locator = locator
+        self.should_wait = should_wait
 
-        self.wait = WebDriverWait(self.driver, 10)
+        self.wait = WebDriverWait(self.driver, timeout)
         self.web_element = None
         self.find_element()
 
@@ -17,16 +18,23 @@ class BaseElement:
         return elements
 
     def find_element(self):
-        element = self.wait.until(EC.visibility_of_element_located(locator=self.locator))
-        self.web_element = element
-        return None
+        if self.should_wait:
+            element = self.wait.until(EC.visibility_of_element_located(locator=self.locator))
+            self.web_element = element
+        else:
+            element = self.driver.find_element(*self.locator)
+            self.web_element = element
 
     def clear_text(self):
         self.web_element.clear()
         return None
 
     def input_text(self, text):
-        self.clear_text()
+        self.web_element.clear()
+        self.input_text_without_clear(text)
+        return None
+
+    def input_text_without_clear(self, text):
         self.web_element.send_keys(text)
         return None
 

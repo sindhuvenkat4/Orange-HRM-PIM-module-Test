@@ -25,12 +25,16 @@ class BaseElement:
             element = self.driver.find_element(*self.locator)
             self.web_element = element
 
+    def find_element_within_element(self, locator):
+        return self.web_element.find_element(*locator)
+
     def clear_text(self):
+        self.click()
         self.web_element.clear()
         return None
 
     def input_text(self, text):
-        self.web_element.clear()
+        self.clear_text()
         self.input_text_without_clear(text)
         return None
 

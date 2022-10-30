@@ -1,3 +1,5 @@
+import random
+
 from page_objects.login_page import Login
 from test_data.credentials import Credentials
 
@@ -12,22 +14,17 @@ def test_TC_PIM_01(driver):
     .input_first_name("Dhuruv")\
     .input_middle_name("venkat")\
     .input_last_name("Aadhiran")\
-    .input_employee_id("0876")\
+    .input_employee_id(random.randint(100000,999999))\
     .set_profile_picture("D:\\Code\\orange_hrm_pim_module_test\\test_data\\images.jpg")\
     .click_save()\
-    .input_nick_name("pattu")\
     .input_other_id("8907")\
     .input_driver_license_number("87839393")\
-    .input_SSN_number("859340")\
-    .input_SIN_number("7645")\
-    .input_military_service("Yes")\
     .input_license_expiry_date("2022-11-12")\
     .input_date_of_birth("1992-08-04")\
     .select_nationality("Indian")\
     .select_marital_status("Single")\
     .select_blood_type("O+")\
     .select_gender("Male")\
-    .select_smoker()\
     .save_personal_details()\
     .save_custom_fields()
 

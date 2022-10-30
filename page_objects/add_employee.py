@@ -1,11 +1,11 @@
-from selenium.common import NoSuchElementException
+from selenium.common import NoSuchElementException, StaleElementReferenceException
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
 
 from page_objects.base_element import BaseElement
-from selenium.webdriver.support import expected_conditions as EC
 from page_objects.base_page import BasePage
-
+from page_objects.delete_employee import DeleteEmployee
+from page_objects.edit_employee import EditEmployee
 
 class AddEmployee(BasePage):
 
@@ -31,8 +31,8 @@ class AddEmployee(BasePage):
 
     def input_middle_name(self, middlename):
         locator = (By.CSS_SELECTOR, "[name='middleName']")
-        first_name_element = BaseElement(driver=self.driver, locator=locator)
-        first_name_element.input_text(middlename)
+        middle_name_element = BaseElement(driver=self.driver, locator=locator)
+        middle_name_element.input_text(middlename)
         return self
 
     def input_last_name(self, lastname):
@@ -57,36 +57,38 @@ class AddEmployee(BasePage):
         locator = (By.CSS_SELECTOR, "[type='submit']")
         save_element = BaseElement(driver=self.driver, locator=locator)
         save_element.click()
+        self.wait_for_successfully_saved_toast()
+        self.wait_for_spinners_to_disappear()
         return self
 
     def input_nick_name(self, nickname):
         locator = (By.XPATH, "//label[text()='Nickname']/../following-sibling::div/input")
-        last_name_element = BaseElement(driver=self.driver, locator=locator)
-        last_name_element.input_text(nickname)
+        nickname_element = BaseElement(driver=self.driver, locator=locator)
+        nickname_element.input_text(nickname)
         return self
 
     def input_other_id(self, other_id):
         locator = (By.XPATH, "//label[text()='Other Id']/../following-sibling::div/input")
-        last_name_element = BaseElement(driver=self.driver, locator=locator)
-        last_name_element.input_text(other_id)
+        other_id_element = BaseElement(driver=self.driver, locator=locator)
+        other_id_element.input_text(other_id)
         return self
 
     def input_driver_license_number(self, driver_license_number):
-        locator = (By.XPATH, "//label[text()='Driver\'s License Number']/../following-sibling::div/input")
-        last_name_element = BaseElement(driver=self.driver, locator=locator)
-        last_name_element.input_text(driver_license_number)
+        locator = (By.XPATH, "//label[text()=\"Driver's License Number\"]/../following-sibling::div/input")
+        driver_license_no_element = BaseElement(driver=self.driver, locator=locator)
+        driver_license_no_element.input_text(driver_license_number)
         return self
 
     def input_SSN_number(self, ssn_number):
         locator = (By.XPATH, "//label[text()='SSN Number']/../following-sibling::*/input")
-        last_name_element = BaseElement(driver=self.driver, locator=locator)
-        last_name_element.input_text(ssn_number)
+        ssn_no_element = BaseElement(driver=self.driver, locator=locator)
+        ssn_no_element.input_text(ssn_number)
         return self
 
     def input_SIN_number(self, sin_number):
         locator = (By.XPATH, "//label[text()='SIN Number']/../following-sibling::*/input")
-        last_name_element = BaseElement(driver=self.driver, locator=locator)
-        last_name_element.input_text(sin_number)
+        sin_no_element = BaseElement(driver=self.driver, locator=locator)
+        sin_no_element.input_text(sin_number)
         return self
 
     def input_military_service(self, service):
@@ -96,13 +98,14 @@ class AddEmployee(BasePage):
         return self
 
     def input_license_expiry_date(self, yyyy_mm_dd):
-        locator = (By.XPATH, "//label[text()='License Expiry Date']/../following-sibling:://input")
+        locator = (By.XPATH, "//label[text()='License Expiry Date']/../following-sibling::*//input")
         license_expiry_date_element = BaseElement(driver=self.driver, locator=locator)
         license_expiry_date_element.input_text(yyyy_mm_dd)
+        license_expiry_date_element.web_element.send_keys(Keys.TAB)
         return self
 
     def input_date_of_birth(self, yyyy_mm_dd):
-        locator = (By.XPATH, "//label[text()='Date of Birth']/../following-sibling:://input")
+        locator = (By.XPATH, "//label[text()='Date of Birth']/../following-sibling::*//input")
         date_of_birth_element = BaseElement(driver=self.driver, locator=locator)
         date_of_birth_element.input_text(yyyy_mm_dd)
         return self
@@ -111,41 +114,40 @@ class AddEmployee(BasePage):
         nationlity_div_locator = (By.XPATH, "//label[text()='Nationality']/../following-sibling::*")
         nationlity_div_element = BaseElement(driver=self.driver, locator=nationlity_div_locator)
         nationlity_div_element.click()
-        dropdown_div_locator = (By.XPATH, "//div[@loading='false']")
-        nationality_list = BaseElement(driver=self.driver, locator=dropdown_div_locator).find_elements()
-
-        for option in nationality_list:
-            if option.text == nationality:
-                option.click()
+        self.select_option(nationality)
         return self
+
+    def select_option(self, option_text):
+        dropdown_div_locator = (By.XPATH, "//div[@loading='false']/div")
+        options = BaseElement(driver=self.driver, locator=dropdown_div_locator).find_elements()
+        try:
+            for option in options:
+                if option.text == option_text:
+                    option.click()
+        except StaleElementReferenceException:
+            print("Stale Element Reference Exception has occurred while selecting the option, " + option_text)
+            # For some reason, StaleElementReferenceException is thrown, even after selecting the option.
+            # Ignoring the exception for now... Need to investigate further....
+
 
     def select_marital_status(self, marital_status):
         marital_status_div_locator = (By.XPATH, "//label[text()='Marital Status']/../following-sibling::*")
         marital_status_div_element = BaseElement(driver=self.driver, locator=marital_status_div_locator)
         marital_status_div_element.click()
-        dropdown_div_locator = (By.XPATH, "//div[@loading='false']")
-        marital_status_list = BaseElement(driver=self.driver, locator=dropdown_div_locator).find_elements()
-
-        for option in marital_status_list:
-            if option.text == marital_status:
-                option.click()
+        self.select_option(marital_status)
         return self
 
     def select_blood_type(self, blood_group):
         blood_type_div_locator = (By.XPATH, "//label[text()='Blood Type']/../following-sibling::*")
         blood_type_div_element = BaseElement(driver=self.driver, locator=blood_type_div_locator)
         blood_type_div_element.click()
-        dropdown_div_locator = (By.XPATH, "//div[@loading='false']")
-        blood_group_list = BaseElement(driver=self.driver, locator=dropdown_div_locator).find_elements()
-
-        for option in blood_group_list:
-            if option.text == blood_group:
-                option.click()
+        self.select_option(blood_group)
         return self
 
     def select_gender(self, gender):
         locator = (By.XPATH, "//label[text()='" + gender + "']/span")
         element = BaseElement(driver=self.driver, locator=locator)
+        self.driver.execute_script("arguments[0].scrollIntoView(false);", element.web_element)
         element.click()
         return self
 
@@ -165,6 +167,18 @@ class AddEmployee(BasePage):
         locator = (By.XPATH, "//h6[text()='Custom Fields']/..//button")
         element = BaseElement(driver=self.driver, locator=locator)
         element.click()
+
+    def click_edit_icon(self, name):
+        locator = (By.XPATH, "//div[text()='" + name + "']/../../*//button/i[contains(@class,'bi-pencil-fill')]")
+        edit_icon_element = BaseElement(driver=self.driver, locator=locator)
+        edit_icon_element.click()
+        return EditEmployee(driver=self.driver)
+
+    def click_delete_icon(self, name):
+        locator = (By.XPATH, "//div[text()='" + name + "']/../../*//button/i[contains(@class,'bi-trash')]")
+        delete_icon_element = BaseElement(driver=self.driver, locator=locator)
+        delete_icon_element.click()
+        return DeleteEmployee(driver=self.driver)
 
 
 

@@ -2,6 +2,7 @@ import random
 
 from page_objects.login_page import Login
 from test_data.credentials import Credentials
+from pathlib import Path
 
 
 def test_TC_PIM_01(driver):
@@ -15,7 +16,7 @@ def test_TC_PIM_01(driver):
     .input_middle_name("venkat")\
     .input_last_name("Aadhiran")\
     .input_employee_id(random.randint(100000,999999))\
-    .set_profile_picture("D:\\Code\\orange_hrm_pim_module_test\\test_data\\images.jpg")\
+    .set_profile_picture(str(Path("../test_data/images.jpg").resolve().absolute()))\
     .click_save()\
     .input_other_id("8907")\
     .input_driver_license_number("87839393")\
